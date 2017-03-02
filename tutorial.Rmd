@@ -20,7 +20,7 @@ In this tutorial we will introduce the packages required for geospatial work in 
 
 # Core Spatial Packages
 
-## Required packages
+## Required packages (the good old days)
 Within in the last several years there has been a lot of effort spent on adding spatial data handling and analysis capability to R.  Thanks to the very significant effort of the package authors we now have the foundation for doing GIS entirely within R. ***Aside:*** *R may not always be the best choice for a given GIS task, but at least now it is a possible choice.  This is a discussion though, for another time*
 
 The four packages that provide this foundation are:
@@ -38,7 +38,7 @@ The `sp` package provides the primary spatial data structures for use in R.  Man
 Getting `sp` added is no different than adding any other package that is on CRAN.
 
 
-```r
+```{r}
 install.packages("sp")
 library("sp")
 ```
@@ -49,7 +49,7 @@ The `rgdal` package provides tools for reading and writing multiple spatial data
 As before, nothing special to get set up with `rgdal` on windows.  Simply:
 
 
-```r
+```{r}
 install.packages("rgdal")
 library("rgdal")
 ```
@@ -62,7 +62,7 @@ Although `sp` and `rgdal` provide raster data capabilities, they do require that
 To install, just do: 
 
 
-```r
+```{r}
 install.packages("raster")
 library("raster")
 ```
@@ -73,13 +73,15 @@ The last of the core packages for doing GIS in R is `rgeos`.  Like `rgdal`, `rge
 To install on windows
 
 
-```r
+```{r}
 install.packages("rgeos")
 library("rgeos")
 ```
 For Linux and Mac the GEOS library will also need to be available.  As with `rgdal` this is a bit beyond the scope of this tutorial.
 
 ## Cutting edge: sf
+
+
 
 ## Exercise 1.1
 The first exercise won't be too thrilling, but we need to make sure everyone has the packages installed. 
