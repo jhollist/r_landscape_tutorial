@@ -21,7 +21,7 @@ In this tutorial we will introduce the packages required for geospatial work in 
 # Core Spatial Packages
 
 ## Required packages (the good old days)
-Within in the last several years there has been a lot of effort spent on adding spatial data handling and analysis capability to R.  Thanks to the very significant effort of the package authors we now have the foundation for doing GIS entirely within R. ***Aside:*** *R may not always be the best choice for a given GIS task, but at least now it is a possible choice.  This is a discussion though, for another time*
+Within in the last several years there has been a lot of effort spent on adding spatial data handling and analysis capability to R.  Thanks to the very significant effort of the package authors we now have the foundation for doing GIS entirely within R. 
 
 The four packages that provide this foundation are:
 
@@ -77,20 +77,29 @@ To install on windows
 install.packages("rgeos")
 library("rgeos")
 ```
+
 For Linux and Mac the GEOS library will also need to be available.  As with `rgdal` this is a bit beyond the scope of this tutorial.
 
 ## Cutting edge: sf
 
+Things are changing quickly in the R/spatial analysis world and the most fundamental change is via the `sf` package.  This package aims to replace `sp`, `rgdal`, and `rgeos`.  There are a lot of reasons why this is a good thing, but that is a bit beyond the scope of this tutorial.  Suffice it to say it should make things faster and simpler!
+
+To install `sf`:
+
+```{r}
+install.packages("sf")
+library("sf")
+```
 
 
-## Exercise 1.1
+## Exercise 1
 The first exercise won't be too thrilling, but we need to make sure everyone has the packages installed. 
 
 1.) Install `sp` and load `sp` into your library.
 2.) Repeat, with `sf`,`rgdal`, `raster`, and `rgeos`.
 
 ## Interacting with an external GIS
-Although we won't be working with external GIS in this workshop, there are several packages that provide ways to move back and forth from another GIS and R.  
+Although we won't be working with external GIS in this tutorial, there are several packages that provide ways to move back and forth from another GIS and R.  For your reference, here are some.
 
 - [spgrass6](https://cran.r-project.org/web/packages/spgrass6/index.html): Provides an interface between R and [GRASS 6+](https://grass.osgeo.org/download/software/#g64x).  Allows for running R from within GRASS as well as running GRASS from within R.  
 - [rgrass7](https://cran.r-project.org/web/packages/rgrass7/index.html): Same as `spgrass6`, but for the latest version of GRASS, [GRASS 7](https://grass.osgeo.org/download/software/#g70x).
@@ -99,15 +108,29 @@ Although we won't be working with external GIS in this workshop, there are sever
 
 ## Spatial analysis packages
 
+There are many packages for doing various types of spatial analysis in R.  For this tutorial we will look at only a few 
+
 ### SDMTools
+
+This package is a large suite of tools for species distribution modelling.  As part of that suite, the FRAGSTATS metrics are inlcuded.
 
 ### spatstat
 
-### ???
+This is a huge package and will take care of pretty much all of your point pattern analysis needs.  
+
+### spdep
+
+Also another huge package for spatial analysis.  This one is dense, but has all of your autocorrelation/variogram functions!
+
+## Exercise 2
+
+1. Install and load `SDMTools`, `spatstat`, and `spdep`.
 
 # Reading in spatial data
 
 ## sp
+
+Reading in data with `sp` requires `rgdal` which supports many different data formats.  For this quick tutorial lets see an example of reading in a shapefile in the current
 
 ## raster
 
