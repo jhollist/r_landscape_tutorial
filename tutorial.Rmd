@@ -2,10 +2,9 @@
 title: "Landscape Ecology with R:A tutorial with raster and sf"
 fig_caption: false
 output:
-  md_document:
-    variant: markdown_github
+  html_document:
     toc: true
-    toc_depth: 3
+    toc_depth: 2
 ---
 
 ```{r setup, echo=FALSE, warning=FALSE, purl=FALSE, message=FALSE}
@@ -38,7 +37,7 @@ The `sp` package provides the primary spatial data structures for use in R.  Man
 Getting `sp` added is no different than adding any other package that is on CRAN.
 
 
-```{r}
+```{r, eval=FALSE}
 install.packages("sp")
 library("sp")
 ```
@@ -49,7 +48,7 @@ The `rgdal` package provides tools for reading and writing multiple spatial data
 As before, nothing special to get set up with `rgdal` on windows.  Simply:
 
 
-```{r}
+```{r, eval=FALSE}
 install.packages("rgdal")
 library("rgdal")
 ```
@@ -62,7 +61,7 @@ Although `sp` and `rgdal` provide raster data capabilities, they do require that
 To install, just do: 
 
 
-```{r}
+```{r, eval=FALSE}
 install.packages("raster")
 library("raster")
 ```
@@ -70,10 +69,10 @@ library("raster")
 ### rgeos
 The last of the core packages for doing GIS in R is `rgeos`.  Like `rgdal`, `rgeos` is a project of OSgeo.  It is a wrapper around the [Geometry Engine Open Source](https://trac.osgeo.org/geos/) c++ library and provides a suite of tools for conducting vector GIS analyses.  
 
-To install on windows
+To install
 
 
-```{r}
+```{r, eval=FALSE}
 install.packages("rgeos")
 library("rgeos")
 ```
@@ -86,7 +85,7 @@ Things are changing quickly in the R/spatial analysis world and the most fundame
 
 To install `sf`:
 
-```{r}
+```{r, eval=FALSE}
 install.packages("sf")
 library("sf")
 ```
@@ -163,6 +162,12 @@ system.time(readOGR(".","big"))
 #The sf way
 system.time(st_read("big.shp"))
 ```
+
+## Exercise 3
+
+1. Read in the rest of the example shapefiles with `readOGR()`. These are `unif.shp` and `clumped.shp`.  Name them `unif` and `clumped`, respectively.
+
+
 # Landscape Metrics
 
 ## With SDMTools
