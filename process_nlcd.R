@@ -1,0 +1,8 @@
+tifs <- list.files("nlcd_ne/", ".tif$",full.names = T)
+library(raster)
+nlcd <- merge(raster(tifs[2]), raster(tifs[6]))
+bbx <- miscPackage::bbox_to_sp(spTransform(x, CRS(proj4string(nlcd))))
+nlcd_c <- crop(nlcd,bbx)
+nlcd_m <- raster::mask(nlcd_c,bbx)
+colortable(nlcd_m) <- colortable(raster(tifs[6]))
+raster::writeRaster(nlcd_m,"nlcd.tif")
