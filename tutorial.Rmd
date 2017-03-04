@@ -130,12 +130,39 @@ Also another huge package for spatial analysis.  This one is dense, but has all 
 
 ## sp
 
-Reading in data with `sp` requires `rgdal` which supports many different data formats.  For this quick tutorial lets see an example of reading in a shapefile in the current
+Reading in data with `sp` requires `rgdal` which supports many different data formats.  For this quick tutorial lets see an example of reading in a shapefile in the current working directory.
+
+```{r}
+rand <- readOGR(".","rand")
+plot(rand)
+```
 
 ## raster
+To read in raster datasets we can use the `raster` packages `raster()` function.  For most raster formats it is simply a matter of telling `raster()` to file location.
+
+```{r}
+nlcd <- raster("nlcd.tif")
+plot(nlcd)
+```
 
 ## sf
+Lastly, reading in data with `sf` is also pretty straightforward.
 
+```{r}
+sf_rand <- st_read("rand.shp")
+```
+
+One of the benefits of using `sf` is the speed.  In my tests it is about twice as fast.  Let's look at a biggish shape file with 1 million points!
+
+![1 million points](https://media4.giphy.com/media/13B1WmJg7HwjGU/giphy.gif)
+
+```{r}
+#The old way
+system.time(readOGR(".","big"))
+
+#The sf way
+system.time(st_read("big.shp"))
+```
 # Landscape Metrics
 
 ## With SDMTools
