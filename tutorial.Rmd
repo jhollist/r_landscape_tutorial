@@ -11,9 +11,9 @@ output:
 ```{r setup, echo=FALSE, warning=FALSE, purl=FALSE, message=FALSE}
 library(knitr)
 options(repos="http://cran.rstudio.com/")
-pkgs <- c("sp","sf", "rgdal", "rgeos", "raster")
+pkgs <- c("sp","sf", "rgdal", "rgeos", "raster", "dplyr","spatstat","maptools","SDMTools")
 x<-lapply(pkgs, library, character.only = TRUE)
-opts_chunk$set(tidy=F, root.dir = ".")
+opts_chunk$set(tidy=F, root.dir = ".", cach=TRUE)
 ```
 
 In this tutorial we will introduce the packages required for geospatial work in R, show how to read in a few spatial data types, demonstrate several ways to calculate landscape metrics, and briefly touch on spatial statistics.  It is assumed that you have [R and RStudio installed](https://github.com/rhodyrstats/intro_r_workshop#software) and that you, at a minimum, understand the basic concepts of the R language (e.g. you can work through[R For Cats](https://rforcats.net)).
@@ -54,7 +54,7 @@ install.packages("rgdal")
 library("rgdal")
 ```
 
-Getting set up on Linux or Mac requires more effort (i.e. need to have GDAL installed).  As this is for a USEPA audience the windows installs will work for most.  Thus, discussion of this is mostly beyond the scope of this workshop.  
+Getting set up on Linux or Mac requires more effort (i.e. need to have GDAL installed).  
 
 ### raster
 Although `sp` and `rgdal` provide raster data capabilities, they do require that the full raster dataset be read into memory.  This can have some performance implications as well as limits the size of datasets you can readily work with.  The `raster` package works around this by working with raster data on the disk.  That too has some performance implications, but for the most part, in my opinion anyway, `raster` makes it easier to work with raster data.  It also provides several additional functions for analyzing raster data.  
@@ -168,26 +168,141 @@ system.time(st_read("big.shp"))
 
 1. Read in the rest of the example shapefiles with `readOGR()`. These are `unif.shp` and `clumped.shp`.  Name them `unif` and `clumped`, respectively.
 
-
 # Landscape Metrics
 
-## With SDMTools
+Landscape metrics is a pretty big topic and a HUGE number of metrics can be calculated.  There are of course many ways to do that, but, in my experience, the most common has been to use [FRAGSTATS](http://www.umass.edu/landeco/research/fragstats/fragstats.html), a stand alone program that has seen many iterations since it was first released as a series of `AML` amd `C` (I'm dating myself) tools back in 1994.  A stand-alone R implementation has not been created but most of the metrics have been included in the `SDMTools` package.  Not sure how much active development is going on with `SDMTools` (it was last updated in August of 2014) but the code should be relatively stable.  The primary purpose for `SDMTools` is species distribution modelling, but it does have two functions for caluclating landscape metrics: `PatchStat()` and `ClassStat()`.
 
-### Patch Statistics
+Before we get started with those, make sure `SDMTools` is installed and loaded/
 
-### Class Statistics
+```{r eval=FALSE}
+install.packages("SDMTools")
+library("SDMTools")
+```
+
+## Class Metrics
+
+Let's start with the class level landscape metrics.  For this all we need to do is point to the land cover data (it is expecting a raster and supports multiple data structures).
+
+```{r cache=TRUE}
+nlcd_class_metrics <- ClassStat(mat = nlcd, cellsize = 30)
+dplyr::tbl_df(nlcd_class_metrics)
+```
+
+## Patch Metrics
+Calculating the patch metrics is a bit more involved becuase it is looking for a binary raster.  So if we want to look at the metrics for all forest patches we need to pull those out of our landcover.  Raster works well with logical statements and will return the cells that match as another raster.  We can string those together with soem "or's" to get all forest patches.  Additionally, we want to get each individual patch labeled.  We can so that with the `SDMTools` function `ConnCompLabel()`.  
+
+```{r, cache = TRUE}
+nlcd_forest <- ConnCompLabel(nlcd==41|nlcd==42|nlcd==43)
+plot(nlcd_forest)
+```
+
+Then to calculate the individual patch metrics.
+
+```{r cache=TRUE}
+nlcd_forest_patch_metrics <- PatchStat(mat = nlcd_forest, cellsize = 30)
+dplyr::tbl_df(nlcd_forest_patch_metrics)
+```
+
+And another example for water.
+
+```{r, cache = TRUE}
+nlcd_water <- ConnCompLabel(nlcd==11)
+plot(nlcd_water)
+```
+
+Then the  metrics.
+
+```{r cache=TRUE}
+nlcd_water_patch_metrics <- PatchStat(mat = nlcd_water, cellsize = 30)
+dplyr::tbl_df(nlcd_water_patch_metrics)
+```
 
 ## Roll your own
 
+While there are lots of things included in the `SDMTools` functions there are also many other types of metrics that may not be included.  In that case you might want to roll your own metrics.  At this point, that is beyond the scope of this tutorial.  Check back in the future!
+
+## Exercise 4
+
+1. Calculate patch statistics for the "developed" classes.  The NLCD classes are listed on the [MRLC Website](https://www.mrlc.gov/nlcd11_leg.php).
+
 # Spatial Statistics
 
+The second big section on landscape ecology data analyis relates to spatial statistics.  In this tutorial we will cover [point pattern analysis](#point-pattern-analysis), [autocorrelation and variography](#autocorrelation-and-variography), and [spatial interpolation](#spatial-interpolation)
+
 ## Point Pattern Analysis
+Point pattern analysis is supported by many packages but the one that seems to have the most complete functionality (based on my VERY limited experience working with point pattern in R) is `spatstat`.  If you are looking for a more complete review of point pattern analysis in R, [the FWS has a good tutorial](https://training.fws.gov/courses/references/tutorials/geospatial/CSP7304/documents/PointPatterTutorial.pdf).
+
+One issue we will need to deal with is that many of the packages for spatial analysis preceeded the formal definitions of spatial data in R (e.g. `sp`, `raster`, and `sf`) thus they have their own data formats.  We will need to manipulate the data that we have read into R and create a `ppp` object.  Below shows examples for the `sp` and `sf` objects.  
+
+First lets convert one of the `sp` objects.  The package `maptools` currently provides many of these conversions via the `as` functions for `sp` objects.
+
+```{r}
+library(maptools)
+#coordinates(rand) = ~x+y
+rand_ppp <- as(rand,"ppp")
+plot(rand_ppp)
+```
+
+Since `sf` is so new their aren't many of these conversion functions yet available.  We can roll our own and create the `ppp` object.
+
+```{r}
+sf_rand_coords <- matrix(unlist(sf_rand$geometry), ncol = 2, byrow = T)
+sf_rand_owin <- owin(st_bbox(sf_rand)[c(1,3)],st_bbox(sf_rand)[c(2,4)])
+sf_rand_ppp <- ppp(x = sf_rand_coords[,1], y = sf_rand_coords[,2],
+                   window = sf_rand_owin, check = T)
+plot(sf_rand_ppp)
+```
+
+The hardest part of this is to make the conversion of our data structures.  Now that we have the `ppp` object we can start to analyze the data.
+
+### Countour plot
+
+First, some exploratory visualization.  Nice, but I need to think about what this is showing us...
+
+```{r}
+contour(density(rand_ppp))
+```
+
+
+### Quadrat count
+We can work on a count of points per quadrats
+
+```{r}
+rand_qc <- quadratcount(sf_rand_ppp, 3,3)
+plot(rand_qc)
+plot(sf_rand_ppp, add = T, cex = 0.5, col = "grey")
+```
 
 ### Ripley's K
+And lastly, we can look at the Ripley's K plot as it was presented to us in the [Turner and Gardner book](http://www.springer.com/us/book/9781493927937).
+
+```{r}
+rand_pp_k <- Kest(rand_ppp)
+plot(rand_pp_k)
+```
+
+
+## Exercise 5
+
+1. Convert the other `sp` objects, `unif` and `clumped`, into `ppp` objects.  
+2. Plot out `quadratcount` object for both.  Use a 3X3 quadrat design.
+3. Plot the Ripley's K estimates for both objects as well.
 
 ## Autocorrelation and Variography
 
 ### Moran's I - Testing Residuals
+
+```{r}
+#From the spdeb help
+library(spdep)
+data(oldcol)
+oldcrime.lm <- lm(CRIME ~ HOVAL + INC, data = COL.OLD)
+lm.morantest(oldcrime.lm,nb2listw(COL.nb, style = "W"))
+```
+
+### Moran's I for a raster
+
+Moran(nlcd)
 
 ### Variogram
 
